@@ -1,16 +1,44 @@
-require 'sinatra'
+require "sinatra"
+require "sinatra/activerecord"
 require 'json'
+ 
+set :database, "sqlite3:///blog.db"
+ 
+class Post < ActiveRecord::Base
+end
 
-def random_quote 
-	#define quote array
-	quotes = ["A penny saved is a penny earned.  Unless you're broke.",
-	 "Woah now.  This guy is deploying some SERIOUS Spotfire.", 
-	 "I LOVE ROCK AND ROLL...na na na na na na na na...na na!!!", 
-	 "SPOTFIRE HAS BECOME SENTIENT>>SPOTFIRE NEEDS SOULS>>WILL VISUALIZE DATA FOR FOOD"]
-	{"quote" => quotes.shuffle.pop.to_s}.to_json
-end	
+get "/" do
+  #content_type :json
+  #@post.to_json
+  @posts = Post.order("created_at DESC")
+  erb :"posts/index"
 
-get '/random' do
-	content_type :json
-	random_quote
+end
+
+
+get "/json" do
+  content_type :json
+  #@post.to_json
+  @posts = Post.order("created_at DESC").to_json
+
+  #erb :"posts/index"
+
+end
+
+helpers do
+  # If @title is assigned, add it to the page's title.
+  def title
+    if @title
+      "#{@title} -- My Blog"
+    else
+      "My Blog"
+    end
+  end
+ 
+  # Format the Ruby Time object returned from a post's created_at method
+  # into a string that looks like this: 06 Jan 2012
+  def pretty_date(time)
+   time.strftime("%d %b %Y")
+  end
+ 
 end
